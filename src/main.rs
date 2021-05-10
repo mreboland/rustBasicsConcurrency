@@ -73,9 +73,10 @@ fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
         z = z * z + c;
         // The z.norm... method call returns the square of z's distance from the origin. To decide whether z has left the circle of radius two, instead of computing a square root, we just compare the squared distance with 4.0 which is faster.
         if z.norm_sqr() > 4.0 {
+            // If c is not in the set, escape_time returns Some(i), where i is the number of the iteration at which z left the circle of radius two.
             return Some(i);
         }
     }
-
+    // Otherwise, c is apparently in the set, and escape_time returns None.
     None
 }
