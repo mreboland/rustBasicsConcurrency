@@ -80,3 +80,46 @@ fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
     // Otherwise, c is apparently in the set, and escape_time returns None.
     None
 }
+
+// Parsing Pair Command-Line Arguments
+
+// The program needs several command-line arguments controlling the resolution of the image we'll write, and the portion of the Mandelbrot set the image shows.
+
+use std::str::FromStr;
+
+/// Parse the string `s` as a coordinate pair, like `"400x600"` or `"1.0,0.5"`.
+///
+/// Specifically, `s` should have the form <left><sep><right>, where <sep> is
+/// the character given by the `separator` argument, and <left> and <right> are both
+/// strings that can be parsed by `T::from_str`.
+///
+/// If `s` has the proper form, return `Some<(x, y)>`. If it doesn't parse
+/// correctly, return `None`.
+
+
+// parse_pair is a generic function. <T: FromStr> can be read as “For any type T that implements the FromStr trait...” It lets us define an entire family of functions at once. parse_pair::<i32> is a function that parses pairs of i32 values; parse_pair::<f64> parses pairs of floating-point values; and so on.
+// Our return type is Option<(T, T)>: either None, or a value Some((v1, v2)), where (v1, v2) is a tuple of two values, both of type T.
+fn parse_pair<T: FromStr>(s: &str, separator:char) -> Option<(T, T)> {
+    // The function doesn't use an explicit return statement, sot its return value is the value of the last (and the only) expression in its body.
+    // The find method searches the string for a character that matches separator. If find returns None, meaning that the separator character doesn't occur in the string, the entire match expression evaluates to None, the parse failed. Otherwise we take index to be the separator's position in the string.
+    match s.find(separator) {
+        None => None,
+        Some(index) => {
+            match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
+                (Ok(l), Ok(r)) => Some((l, r)),
+                _ => None
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_pair() {
+    assert_eq!(parse_pair::<i32>("", ','), None);
+    assert_eq!(parse_pair::<i32>("10,", ','), None);
+    assert_eq!(parse_pair::<i32>(",10", ','), None);
+    assert_eq!(parse_pair::<i32>("10,20", ','), Some((10, 20)));
+    assert_eq!(parse_pair::<i32>("10,20xy", ','), None);
+    assert_eq!(parse_pair::<f64>("0.5x", 'x'), None);
+    assert_eq!(parse_pair::<f64>("0.5x1.5", 'x'), Some((0.5, 1.5)));
+}
